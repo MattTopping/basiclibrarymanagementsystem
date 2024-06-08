@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,9 +21,9 @@ namespace CSNetLibraryManagement
         {
             Console.WriteLine("Please select an option\n" +
                 "[1]: List books\n" +
-                "[2]: Search for a book\n" +
-                "[3]: Borrow a book\n" +
-                "[4]: Return a book\n" +
+                "[ ]: Search for a book\n" +
+                "[ ]: Borrow a book\n" +
+                "[ ]: Return a book\n" +
                 "[5]: Add a book");
             string userResponse = Console.ReadLine();
             switch (userResponse)
@@ -31,13 +32,19 @@ namespace CSNetLibraryManagement
                     promptBookList();
                     break;
                 case "2":
-                    promptBookSearch();
+                    //promptBookSearch();
+                    Console.WriteLine("Not yet implemented.");
+                    promptLibraryTasks();
                     break;
                 case "3":
-                    promptBookBorrow();
+                    //promptBookBorrow
+                    Console.WriteLine("Not yet implemented.");
+                    promptLibraryTasks();
                     break;
                 case "4":
-                    promptBookReturn();
+                    //promptBookReturn();
+                    Console.WriteLine("Not yet implemented.");
+                    promptLibraryTasks();
                     break;
                 case "5":
                     promptBookAddition();
@@ -54,41 +61,54 @@ namespace CSNetLibraryManagement
         /// </summary>
         private void promptBookList()
         {
-            string sqlQuery = "SELECT * FROM dbo.Books";
+            string sqlQuery = "Select [Book ID], Title, Author, [Publication Year], [Borrowing User] " +
+                "FROM [dbo].[Books] " +
+                "ORDER BY Title";
+
+            //Open SQL connection
             using (SqlConnection sqlConnection = new SqlConnection(tools.DbConectionString)) 
             {
                 sqlConnection.Open();
                 SqlCommand command = new SqlCommand(sqlQuery, sqlConnection);
                 using (SqlDataReader sqlReader = command.ExecuteReader())
                 {
-                    if (sqlReader.Read())
+                    while (sqlReader.Read())
                     {
-                        Console.WriteLine(String.Format("{0}", sqlReader["title"])); // To be expanded
+                        Guid bookid;
+                        string title;
+                        string author;
+                        int publicationYear;
+                        string status;
+
+                        //Check SQL values for null
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Book ID"))) bookid = (Guid)sqlReader["Book ID"];
+                        else bookid = Guid.Empty;
+
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Title"))) title = (string)sqlReader["Title"];
+                        else title = string.Empty;
+
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Author"))) author = (string)sqlReader["Author"];
+                        else author = string.Empty;
+
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Publication Year"))) publicationYear = (int)sqlReader["Publication Year"];
+                        else publicationYear = 0;
+
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Borrowing User"))) status = "Borrowed";
+                        else status = "Available";
+
+                        // List row in console
+                        Console.WriteLine(String.Format("|{0}|{1}|{2}|{3}|{4}|", bookid, title, author, publicationYear, status));
                     }
-                    else Console.WriteLine("No books found");
+                    sqlReader.Close();
                 }
                 sqlConnection.Close();
-            };
+            }
             promptLibraryTasks();
         }
 
         private void promptBookSearch()
         {
             throw new NotImplementedException();
-            //conn.Open();
-
-            //SqlCommand command = new SqlCommand("Select id from [table1] where name=@zip", conn);
-            //command.Parameters.AddWithValue("@zip", "india");
-            //// int result = command.ExecuteNonQuery();
-            //using (SqlDataReader reader = command.ExecuteReader())
-            //{
-            //    if (reader.Read())
-            //    {
-            //        Console.WriteLine(String.Format("{0}", reader["id"]));
-            //    }
-            //}
-
-            //conn.Close();
         }
 
         private void promptBookBorrow()
@@ -101,9 +121,34 @@ namespace CSNetLibraryManagement
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        ///     Function used to add a row into the database.
+        /// </summary>
         private void promptBookAddition()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("You have selected to add a book to our library. Please provide the following.\n" +
+                "Title:");
+            string title = Console.ReadLine();
+
+            Console.WriteLine("Author: ");
+            string author = Console.ReadLine();
+            int publicationYear;
+
+            Console.WriteLine("Publication Year: ");
+            try
+            {
+                publicationYear = Int32.Parse(Console.ReadLine());
+            }
+            catch
+            {
+                Console.WriteLine("A valid number as not provided. Book addition failed.");
+                promptLibraryTasks();
+                return;
+            }
+
+            Book newBook = new Book(title, author, publicationYear);
+            newBook.push();
+            promptLibraryTasks();
         }
 
 

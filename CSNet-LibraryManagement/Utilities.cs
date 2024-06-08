@@ -40,9 +40,9 @@ namespace CSNetLibraryManagement
         /// <summary>
         ///     Get methods for dbConnectionString
         /// </summary>
-        public string DbConectionString   // property
+        public string DbConectionString
         {
-            get { return dbConectionString; }   // get method
+            get { return dbConectionString; }
         }
     }
 }
