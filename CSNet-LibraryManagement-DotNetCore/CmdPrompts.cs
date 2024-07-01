@@ -16,7 +16,7 @@ internal class CmdPrompts
     {
         Console.WriteLine("Please select an option\n" +
             "[1]: List books\n" +
-            "[ ]: Search for a book\n" +
+            "[2]: Search for a book\n" +
             "[ ]: Borrow a book\n" +
             "[ ]: Return a book\n" +
             "[5]: Add a book\n" + 
@@ -28,9 +28,7 @@ internal class CmdPrompts
                 promptBookList();
                 break;
             case "2":
-                //promptBookSearch();
-                Console.WriteLine("Not yet implemented.");
-                promptLibraryTasks();
+                promptBookSearch();
                 break;
             case "3":
                 //promptBookBorrow
@@ -61,20 +59,73 @@ internal class CmdPrompts
     private void promptBookList()
     {
         List<string> bookList = librarian.fetchAllBooks();
-        if (bookList.Count > 0){
-            foreach (string book in bookList){
-                Console.WriteLine(book);
-            }
-        }
-        else{
-            Console.WriteLine("There are currently no books in the library.");
-        }
+        bookListFormatter(bookList);
         promptLibraryTasks();
     }
 
     private void promptBookSearch()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("What would you like to search by:\n" +
+            "[1]: By Title\n" +
+            "[2]: By Author\n" +
+            "[3]: By Publication Year");
+        string? userResponse = Console.ReadLine();
+        switch (userResponse)
+        {
+            case "1":
+                Console.WriteLine("Please enter a title:");
+                string? inputTitle = Console.ReadLine();
+                if (inputTitle != null)
+                {
+                    List<string> bookList = librarian.fetchBooksByTitle(inputTitle);
+                    bookListFormatter(bookList);
+                }
+                else 
+                {
+                    Console.WriteLine("No value entered.");
+                }
+                break;
+            case "2":
+                Console.WriteLine("Please enter an author:");
+                string? inputAuthor = Console.ReadLine();
+                if (inputAuthor != null)
+                {
+                    List<string> bookList = librarian.fetchBooksByAuthor(inputAuthor);
+                    bookListFormatter(bookList);
+                }
+                else
+                {
+                    Console.WriteLine("No value entered.");
+                }
+                break;
+            case "3":
+                Console.WriteLine("Please enter a publication year:");
+                string? inputYear = Console.ReadLine();
+                if (inputYear != null)
+                {
+                    int inputYearAsInt;
+                    try
+                    {
+                        inputYearAsInt = int.Parse(inputYear);
+                        List<string> bookList = librarian.fetchBooksByPublicationYear(inputYearAsInt);
+                        bookListFormatter(bookList);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("A valid number as not provided. Unable to search.");
+                    }
+
+                }
+                else
+                {
+                    Console.WriteLine("No value entered.");
+                }
+                break;
+            default:
+                Console.WriteLine("Invalid option...");
+                break;
+        }
+        promptLibraryTasks();
     }
 
     private void promptBookBorrow()
@@ -125,7 +176,7 @@ internal class CmdPrompts
         if (inputtedPublicationYear != null){
             try
             {
-                publicationYear = Int32.Parse(inputtedPublicationYear);
+                publicationYear = int.Parse(inputtedPublicationYear);
             }
             catch
             {
@@ -152,22 +203,23 @@ internal class CmdPrompts
     /// </summary>
     public void setUser()
     {
-        Console.WriteLine("Please select an option\n" +
-            "[1]: Login\n" +
-            "[2]: Create");
-        string? userResponse = Console.ReadLine();
-        switch (userResponse) {
-            case "1": 
-                promptUserLogin();
-                break;
-            case "2":
-                promptUserCreate();
-                break;
-            default:
-                Console.WriteLine("Invalid option...");
-                setUser(); 
-                break;
-        }
+        throw new NotImplementedException();
+        //Console.WriteLine("Please select an option\n" +
+        //    "[1]: Login\n" +
+        //    "[2]: Create");
+        //string? userResponse = Console.ReadLine();
+        //switch (userResponse) {
+        //    case "1": 
+        //        promptUserLogin();
+        //        break;
+        //    case "2":
+        //        promptUserCreate();
+        //        break;
+        //    default:
+        //        Console.WriteLine("Invalid option...");
+        //        setUser(); 
+        //        break;
+        //}
     }
 
     /// <summary>
@@ -189,5 +241,20 @@ internal class CmdPrompts
     private void promptUserCreate() 
     { 
         throw new NotImplementedException();
+    }
+
+    private void bookListFormatter(List<string> bookList) 
+    {
+        if (bookList.Count > 0)
+        {
+            foreach (string book in bookList)
+            {
+                Console.WriteLine(book);
+            }
+        }
+        else
+        {
+            Console.WriteLine("There are no books for your query.");
+        }
     }
 }

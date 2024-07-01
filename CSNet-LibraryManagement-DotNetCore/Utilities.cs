@@ -30,7 +30,6 @@ public sealed class Utilities
     {
         // Build a config object, using env vars and JSON providers.
         IConfigurationRoot config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
             .Build();
 

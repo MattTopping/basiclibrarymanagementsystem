@@ -8,6 +8,7 @@ internal class Book
 
     private Guid bookId;
     private Guid borrwingUserId;
+    private bool borrowed;
 
     private string? title;
     private string? author;
@@ -52,7 +53,7 @@ internal class Book
         else 
         {
             sqlStatement = "UPDATE dbo.Books " +
-                "SET Title=@title,Author=@author,[Publication Year]=@publicationyear" +
+                "SET Title=@title,Author=@author,[Publication Year]=@publicationyear,Borrowed=@borrowed" +
                 "WHERE [Book ID]=@id";
         }
 
@@ -65,11 +66,13 @@ internal class Book
                 command.Parameters.Add("@author", SqlDbType.NVarChar);
                 command.Parameters.Add("@publicationyear", SqlDbType.Int);
                 command.Parameters.Add("@id", SqlDbType.UniqueIdentifier);
+                command.Parameters.Add("@borrowed", SqlDbType.Bit);
 
                 command.Parameters["@title"].Value = this.title;
                 command.Parameters["@author"].Value = this.author;
                 command.Parameters["@publicationyear"].Value = this.publicationYear;
                 command.Parameters["@id"].Value = this.bookId;
+                command.Parameters["@borrowed"].Value = this.borrowed;
 
                 // Execute SQL command
                 try
@@ -109,6 +112,12 @@ internal class Book
     {
         get { return borrwingUserId; }
         set { borrwingUserId = value; }
+    }
+
+    public bool Borrowed
+    {
+        get { return borrowed; }
+        set { borrowed = value; }
     }
 
     public string? Title
