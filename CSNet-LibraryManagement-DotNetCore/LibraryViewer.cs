@@ -1,7 +1,6 @@
 namespace CSNet_LibraryManagement_DotNetCore;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using static System.Reflection.Metadata.BlobBuilder;
 
 internal class LibraryViewer
 {

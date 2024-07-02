@@ -1,6 +1,7 @@
 ﻿namespace CSNet_LibraryManagement_DotNetCore;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using static System.Reflection.Metadata.BlobBuilder;
 
 internal class Book
 {
@@ -53,8 +54,8 @@ internal class Book
         else 
         {
             sqlStatement = "UPDATE dbo.Books " +
-                "SET Title=@title,Author=@author,[Publication Year]=@publicationyear,Borrowed=@borrowed" +
-                "WHERE [Book ID]=@id";
+                "SET Title=@title,Author=@author,[Publication Year]=@publicationyear,Borrowed=@borrowed " +
+                "WHERE [Book ID]=CAST(@id as uniqueidentifier)";
         }
 
         using (SqlConnection sqlConnection = new SqlConnection(tools.DbConectionString))
@@ -98,9 +99,36 @@ internal class Book
         };
     }
 
+    //TODO: Finish
     private void pull(Guid guid) 
     {
-        throw new NotImplementedException();
+        string sqlQuery = "Select Title, Author, [Publication Year], Borrowed " +
+            "FROM [dbo].[Books] " +
+            "WHERE [Book ID]=CAST(@id as uniqueidentifier)";
+
+        //Open SQL connection
+        using (SqlConnection sqlConnection = new SqlConnection(tools.DbConectionString))
+        {
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.Add("@id", SqlDbType.UniqueIdentifier);
+                command.Parameters["@id"].Value = guid;
+
+                sqlConnection.Open();
+                using (SqlDataReader sqlReader = command.ExecuteReader())
+                {
+                    while (sqlReader.Read())
+                    {
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Title"))) title = (string)sqlReader["Title"];
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Author"))) author = (string)sqlReader["Author"];
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Publication Year"))) publicationYear = (int)sqlReader["Publication Year"];
+                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Borrowed"))) borrowed = (bool)sqlReader["Borrowed"];
+                    }
+                    sqlReader.Close();
+                }
+                sqlConnection.Close();
+            }
+        }
     }
 
     public Guid BookID

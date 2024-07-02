@@ -17,8 +17,8 @@ internal class CmdPrompts
         Console.WriteLine("Please select an option\n" +
             "[1]: List books\n" +
             "[2]: Search for a book\n" +
-            "[ ]: Borrow a book\n" +
-            "[ ]: Return a book\n" +
+            "[3]: Borrow a book\n" +
+            "[4]: Return a book\n" +
             "[5]: Add a book\n" + 
             "[E]: Exit");
         string? userResponse = Console.ReadLine();
@@ -26,18 +26,18 @@ internal class CmdPrompts
         {
             case "1":
                 promptBookList();
+                promptLibraryTasks();
                 break;
             case "2":
                 promptBookSearch();
+                promptLibraryTasks();
                 break;
             case "3":
-                //promptBookBorrow
-                Console.WriteLine("Not yet implemented.");
+                promptBookBorrow();
                 promptLibraryTasks();
                 break;
             case "4":
-                //promptBookReturn();
-                Console.WriteLine("Not yet implemented.");
+                promptBookReturn();
                 promptLibraryTasks();
                 break;
             case "5":
@@ -60,7 +60,6 @@ internal class CmdPrompts
     {
         List<string> bookList = librarian.fetchAllBooks();
         bookListFormatter(bookList);
-        promptLibraryTasks();
     }
 
     private void promptBookSearch()
@@ -125,17 +124,75 @@ internal class CmdPrompts
                 Console.WriteLine("Invalid option...");
                 break;
         }
-        promptLibraryTasks();
     }
 
     private void promptBookBorrow()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Enter the GUID of the book you would like to borrow:");
+        string? inputGuid = Console.ReadLine();
+        if (inputGuid != null)
+        {
+            Guid inputGuidAsGuid;
+            try
+            {
+                //TODO: Single use (move to another class?)
+                inputGuidAsGuid = Guid.Parse(inputGuid);
+                Book book = new Book(inputGuidAsGuid);
+                if (book.Borrowed == false)
+                {
+                    book.Borrowed = true;
+                    book.push(); //TODO: Try/Catch? 
+                    Console.WriteLine("Book borrowed!");
+                }
+                else 
+                {
+                    Console.WriteLine("Book is already borrowed. It is not available to borrow at this time.");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("A valid guid as not provided. Unable to borrow book.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("No value entered.");
+        }
     }
 
     private void promptBookReturn()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Enter the GUID of the book you would like to return:");
+        string? inputGuid = Console.ReadLine();
+        if (inputGuid != null)
+        {
+            Guid inputGuidAsGuid;
+            try
+            {
+                inputGuidAsGuid = Guid.Parse(inputGuid);
+
+                //TODO: Single use (move to another class?)
+                Book book = new Book(inputGuidAsGuid);
+                if (book.Borrowed == true)
+                {
+                    book.Borrowed = false;
+                    book.push(); //TODO: Try/Catch? 
+                    Console.WriteLine("Book returned!");
+                }
+                else
+                {
+                    Console.WriteLine("Book is already returned. It is not available to return at this time.");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("A valid guid as not provided. Unable to borrow book.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("No value entered.");
+        }
     }
 
     /// <summary>
@@ -196,6 +253,20 @@ internal class CmdPrompts
         promptLibraryTasks();
     }
 
+    private void bookListFormatter(List<string> bookList)
+    {
+        if (bookList.Count > 0)
+        {
+            foreach (string book in bookList)
+            {
+                Console.WriteLine(book);
+            }
+        }
+        else
+        {
+            Console.WriteLine("There are no books for your query.");
+        }
+    }
 
     /// <summary>
     ///     Function is used to initial the user action to either login or create or use during the session.
@@ -204,22 +275,6 @@ internal class CmdPrompts
     public void setUser()
     {
         throw new NotImplementedException();
-        //Console.WriteLine("Please select an option\n" +
-        //    "[1]: Login\n" +
-        //    "[2]: Create");
-        //string? userResponse = Console.ReadLine();
-        //switch (userResponse) {
-        //    case "1": 
-        //        promptUserLogin();
-        //        break;
-        //    case "2":
-        //        promptUserCreate();
-        //        break;
-        //    default:
-        //        Console.WriteLine("Invalid option...");
-        //        setUser(); 
-        //        break;
-        //}
     }
 
     /// <summary>
@@ -241,20 +296,5 @@ internal class CmdPrompts
     private void promptUserCreate() 
     { 
         throw new NotImplementedException();
-    }
-
-    private void bookListFormatter(List<string> bookList) 
-    {
-        if (bookList.Count > 0)
-        {
-            foreach (string book in bookList)
-            {
-                Console.WriteLine(book);
-            }
-        }
-        else
-        {
-            Console.WriteLine("There are no books for your query.");
-        }
     }
 }
