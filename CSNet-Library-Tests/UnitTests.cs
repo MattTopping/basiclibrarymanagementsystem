@@ -12,6 +12,13 @@ namespace CSNet_Library_Tests
         private const string testBookAuthor = "MSTestUnitTestSuite";
         private const int testBookPublicationYear = 2050;
 
+        /// <summary>
+        ///     Test Initialiser that creates a unique record for use throughout each test. 
+        ///     This ensures the test suite is interacting with a DB record it created.
+        ///     
+        ///     SQL query is done outside of written classes in the main program to ensure that 
+        ///         there is no reliance on untested functions.
+        /// </summary>
         [TestInitialize]
         public void TestInitialize()
         {
@@ -39,6 +46,10 @@ namespace CSNet_Library_Tests
             };
         }
 
+        /// <summary>
+        ///     Test Cleanup deletes the DB record created to remove any test data created by the test suite. Delete call
+        ///         is targetting the same record using the GUID returned from the insert in the initalise stage.
+        /// </summary>
         [TestCleanup]
         public void TestCleanup()
         {
@@ -60,6 +71,10 @@ namespace CSNet_Library_Tests
             };
         }
 
+        /// <summary>
+        ///     Test the list funcitonality of Library Viewer class.
+        ///     Expected: Have the recored created in the initalise step appear in the Library Viewer list.
+        /// </summary>
         [TestMethod]
         public void LibraryViewer_ListBooks()
         {
@@ -69,6 +84,10 @@ namespace CSNet_Library_Tests
             Assert.IsTrue(books.Contains(expectedBookFormat), "The book used in the test suite was not listed by the worker class");
         }
 
+        /// <summary>
+        ///     Test the search by title functionality of the Library Viewer class.
+        ///     Expected: Have the recored created in the initalise step appear in the Library Viewer list.   
+        /// </summary>
         [TestMethod]
         public void LibraryViewer_SearchBookByTitle()
         {
@@ -78,6 +97,10 @@ namespace CSNet_Library_Tests
             Assert.IsTrue(books.Contains(expectedBookFormat), "The book used in the test suite was not listed by the worker class");
         }
 
+        /// <summary>
+        ///     Negative test the search by title functionality of the Library Viewer class.
+        ///     Expected: Have the recored created in the initalise step absent from the Library Viewer list.   
+        /// </summary>
         [TestMethod]
         public void LibraryViewer_SearchBookByWrongTitle()
         {
@@ -87,7 +110,10 @@ namespace CSNet_Library_Tests
             Assert.IsFalse(books.Contains(expectedBookFormat), "The book used in the test suite was listed by the worker class");
         }
 
-
+        /// <summary>
+        ///     Test that the Book object correct pulls a representation of the row in the DB.
+        ///     Expected: All book object properties match the data given to the initalisation function.
+        /// </summary>
         [TestMethod]
         public void Book_PullInfoFromDb()
         {
@@ -99,6 +125,10 @@ namespace CSNet_Library_Tests
             Assert.IsTrue(book.Borrowed.Equals(false), "Book object does not have borrowed bool as default false value");
         }
 
+        /// <summary>
+        ///     Negative test that borrowing cannot happen on a borrowed book. 
+        ///     Expected: Exception thrown when a borrowed book is request for borrowing.
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(Exception))]
         public void Book_BorrowBorrowedBook()
@@ -108,6 +138,10 @@ namespace CSNet_Library_Tests
             book.borrowBook();
         }
 
+        /// <summary>
+        ///     Negative test for returning an available book.
+        ///     Expected: Exception thrown when an available book is attmepted to be returned.
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(Exception))]
         public void Book_ReturnReturnedBook()

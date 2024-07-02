@@ -96,6 +96,7 @@ public class Book
         {
             using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
             {
+                //Mapping GUID into sqlQuery to avoid SQL injection
                 command.Parameters.Add("@id", SqlDbType.UniqueIdentifier);
                 command.Parameters["@id"].Value = guid;
 
@@ -104,6 +105,7 @@ public class Book
                 {
                     while (sqlReader.Read())
                     {
+                        // check each field for null reference before mapping the value.
                         title = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Title")) ? (string)sqlReader["Title"] : null;
                         author = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Author")) ? (string)sqlReader["Author"] : null;
                         publicationYear = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Publication Year")) ? (int)sqlReader["Publication Year"] : null;
@@ -116,6 +118,10 @@ public class Book
         }
     }
 
+    /// <summary>
+    ///     Used to borrow a book. Validates if a book is eligible to borrow before executing.
+    /// </summary>
+    /// <exception cref="Exception"></exception>
     public void borrowBook()
     {
         if (borrowed == false)
@@ -129,7 +135,11 @@ public class Book
         }
     }
 
-        public void returnBook()
+    /// <summary>
+    ///     Used to return a book. Validates if a book is eligible for return before executing.
+    /// </summary>
+    /// <exception cref="Exception"></exception>
+    public void returnBook()
     {
         if (borrowed == true)
         {

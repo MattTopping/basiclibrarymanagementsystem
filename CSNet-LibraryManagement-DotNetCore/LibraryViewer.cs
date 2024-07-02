@@ -10,6 +10,10 @@ public class LibraryViewer
         tools = new Utilities();
     }
 
+    /// <summary>
+    ///     Function to return all rows on the dbo.books table
+    /// </summary>
+    /// <returns>List of all found books</returns>
     public List<string> fetchAllBooks()
     {
         List<string> books = new List<string>();
@@ -21,18 +25,26 @@ public class LibraryViewer
         //Open SQL connection
         using (SqlConnection sqlConnection = new SqlConnection(tools.DbConectionString)) 
         {
-            sqlConnection.Open();
-            SqlCommand command = new SqlCommand(sqlQuery, sqlConnection);
-            using (SqlDataReader sqlReader = command.ExecuteReader())
+            using(SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
             {
-                books = formatBooksAsString(sqlReader);
-                sqlReader.Close();
+                sqlConnection.Open();
+                using (SqlDataReader sqlReader = command.ExecuteReader())
+                {
+                    //Use helper function to format results
+                    books = formatBooksAsString(sqlReader);
+                    sqlReader.Close();
+                }
+                sqlConnection.Close();
             }
-            sqlConnection.Close();
         }
         return books;
     }
 
+    /// <summary>
+    ///     Search function used to return all dbo.books record that match a provided Title.
+    /// </summary>
+    /// <param name="inputTitle">Title search key</param>
+    /// <returns>List of all found books</returns>
     public List<string> fetchBooksByTitle(string inputTitle)
     {
         List<string> books = new List<string>();
@@ -47,12 +59,14 @@ public class LibraryViewer
         {
             using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection)) 
             {
+                //Map title into sqlQuery to avoid SQL injection
                 command.Parameters.Add("@title", SqlDbType.NVarChar);
                 command.Parameters["@title"].Value = "%" + inputTitle + "%";
 
                 sqlConnection.Open();
                 using (SqlDataReader sqlReader = command.ExecuteReader())
                 {
+                    //Use helper function to format results
                     books = formatBooksAsString(sqlReader);
                     sqlReader.Close();
                 }
@@ -62,6 +76,11 @@ public class LibraryViewer
         return books;
     }
 
+    /// <summary>
+    ///     Search function used to return all dbo.books record that match a provided author.
+    /// </summary>
+    /// <param name="inputAuthor">Author search key</param>
+    /// <returns>List of all found books</returns>
     public List<string> fetchBooksByAuthor(string inputAuthor)
     {
         List<string> books = new List<string>();
@@ -76,12 +95,14 @@ public class LibraryViewer
         {
             using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
             {
+                //Map author into sqlQuery to avoid SQL injection
                 command.Parameters.Add("@author", SqlDbType.NVarChar);
                 command.Parameters["@author"].Value = "%" + inputAuthor + "%";
 
                 sqlConnection.Open();
                 using (SqlDataReader sqlReader = command.ExecuteReader())
                 {
+                    //Use helper function to format results
                     books = formatBooksAsString(sqlReader);
                     sqlReader.Close();
                 }
@@ -91,6 +112,11 @@ public class LibraryViewer
         return books;
     }
 
+    /// <summary>
+    ///     Search function used to return all dbo.books record that match a provided publication year.
+    /// </summary>
+    /// <param name="inputYear">Publication year search key</param>
+    /// <returns>List of all found books</returns>
     public List<string> fetchBooksByPublicationYear(int inputYear)
     {
         List<string> books = new List<string>();
@@ -105,12 +131,14 @@ public class LibraryViewer
         {
             using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
             {
+                //Map publication year into sqlQuery to avoid SQL injection
                 command.Parameters.Add("@publicationyear", SqlDbType.Int);
                 command.Parameters["@publicationYear"].Value = inputYear;
 
                 sqlConnection.Open();
                 using (SqlDataReader sqlReader = command.ExecuteReader())
                 {
+                    //Use helper function to format results
                     books = formatBooksAsString(sqlReader);
                     sqlReader.Close();
                 }
@@ -120,6 +148,11 @@ public class LibraryViewer
         return books;
     }
 
+    /// <summary>
+    ///     Helper function takes an SQL reader and formats the values into a console friendly string
+    /// </summary>
+    /// <param name="sqlReader">SQL Reader that contains results for the dbo.Books table that need formatting for a console</param>
+    /// <returns>List of all read rows in SQL reader as console friendly strings</returns>
     private List<string> formatBooksAsString(SqlDataReader sqlReader) 
     {
         List<string> books = new List<string>();

@@ -2,7 +2,6 @@
 
 public class CmdPrompts
 {
-    //User loggedInUser; // Not yet implemented
     LibraryViewer librarian;
 
     public CmdPrompts(){
@@ -10,7 +9,7 @@ public class CmdPrompts
     }
 
     /// <summary>
-    ///     Function used to allow users t select what application function they would like to use.
+    ///     Function used to allow users to select what application function they would like to use.
     /// </summary>
     public void promptLibraryTasks()
     {
@@ -59,8 +58,14 @@ public class CmdPrompts
     /// </summary>
     private void promptBookList()
     {
-        List<string> bookList = librarian.fetchAllBooks();
-        printBookList(bookList);
+        try{
+            List<string> bookList = librarian.fetchAllBooks();
+            printBookList(bookList);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private void promptBookSearch()
@@ -75,10 +80,15 @@ public class CmdPrompts
             case "1":
                 Console.WriteLine("Please enter a title:");
                 string? inputTitle = Console.ReadLine();
-                if (inputTitle != null)
+                if (inputTitle != null)  //If there is a valid input key, search and print results to screen
                 {
-                    List<string> bookList = librarian.fetchBooksByTitle(inputTitle);
-                    printBookList(bookList);
+                    try{
+                        List<string> bookList = librarian.fetchBooksByTitle(inputTitle);
+                        printBookList(bookList);
+                    }
+                    catch(Exception ex){
+                        Console.WriteLine(ex.Message);
+                    }
                 }
                 else 
                 {
@@ -88,10 +98,16 @@ public class CmdPrompts
             case "2":
                 Console.WriteLine("Please enter an author:");
                 string? inputAuthor = Console.ReadLine();
-                if (inputAuthor != null)
+                if (inputAuthor != null) //If there is a valid input key, search and print results to screen
                 {
-                    List<string> bookList = librarian.fetchBooksByAuthor(inputAuthor);
-                    printBookList(bookList);
+                    try{
+                        List<string> bookList = librarian.fetchBooksByAuthor(inputAuthor);
+                        printBookList(bookList);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                 }
                 else
                 {
@@ -101,14 +117,20 @@ public class CmdPrompts
             case "3":
                 Console.WriteLine("Please enter a publication year:");
                 string? inputYear = Console.ReadLine();
-                if (inputYear != null)
+                if (inputYear != null) 
                 {
                     int inputYearAsInt;
-                    try
+                    try // ensure input is a value int before searching against an int col in the DB
                     {
                         inputYearAsInt = int.Parse(inputYear);
-                        List<string> bookList = librarian.fetchBooksByPublicationYear(inputYearAsInt);
-                        printBookList(bookList);
+                        try{
+                            List<string> bookList = librarian.fetchBooksByPublicationYear(inputYearAsInt);
+                            printBookList(bookList);
+                        }
+                        catch(Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
                     }
                     catch
                     {
@@ -127,6 +149,9 @@ public class CmdPrompts
         }
     }
 
+    /// <summary>
+    ///     Function used to the prompt the user to borrow a book
+    /// </summary>
     private void promptBookBorrow()
     {
         Console.WriteLine("Enter the GUID of the book you would like to borrow:");
@@ -134,11 +159,11 @@ public class CmdPrompts
         if (inputGuid != null)
         {
             Guid inputGuidAsGuid;
-            try
+            try // ensure provide input is a valid GUID
             {
                 inputGuidAsGuid = Guid.Parse(inputGuid);
                 Book book = new Book(inputGuidAsGuid);
-                try
+                try // try borrow and catch validation exceptions
                 {
                     book.borrowBook();
                     Console.WriteLine("Book borrowed!");
@@ -159,6 +184,9 @@ public class CmdPrompts
         }
     }
 
+    /// <summary>
+    ///     Funciton used to prompt a user through a book return
+    /// </summary>
     private void promptBookReturn()
     {
         Console.WriteLine("Enter the GUID of the book you would like to return:");
@@ -166,13 +194,13 @@ public class CmdPrompts
         if (inputGuid != null)
         {
             Guid inputGuidAsGuid;
-            try
+            try // ensure provide input is a valid GUID
             {
                 inputGuidAsGuid = Guid.Parse(inputGuid);
 
                 //TODO: Single use (move to another class?)
                 Book book = new Book(inputGuidAsGuid);
-                try
+                try // try return and catch validation exceptions
                 {
                     book.returnBook();
                     Console.WriteLine("Book returned!");
@@ -202,10 +230,11 @@ public class CmdPrompts
         string author;
         int publicationYear;
 
+        //Valid title input by ensuring it is not null. Return to main menu if it is not valid.
         Console.WriteLine("You have selected to add a book to our library. Please provide the following.\n" +
             "Title:");
         string? inputtedTitle = Console.ReadLine();
-        if(inputtedTitle != null){ //TODO: investigate let statment?
+        if(inputtedTitle != null){
             title = inputtedTitle;
         }
         else{
@@ -214,9 +243,10 @@ public class CmdPrompts
             return;
         }
 
+        //Valid author input by ensuring it is not null. Return to main menu if it is not valid.
         Console.WriteLine("Author: ");
         string? inputtedAuthor = Console.ReadLine();
-        if(inputtedAuthor != null){ //TODO: investigate let statment?
+        if(inputtedAuthor != null){ 
             author = inputtedAuthor;
         }
         else{
@@ -225,8 +255,8 @@ public class CmdPrompts
             return;
         }
 
+        //Valid title publication year by ensuring it is not null. Return to main menu if it is not valid.
         Console.WriteLine("Publication Year: ");
-
         string? inputtedPublicationYear = Console.ReadLine();
         if (inputtedPublicationYear != null){
             try
@@ -246,6 +276,7 @@ public class CmdPrompts
             return;
         }
 
+        //Push the inputted values into the database through the book object
         Book newBook = new Book(title, author, publicationYear);
         try
         {
@@ -258,6 +289,10 @@ public class CmdPrompts
         }
     }
 
+    /// <summary>
+    ///     Small helper function that prints out each string item in a list
+    /// </summary>
+    /// <param name="bookList"></param>
     private void printBookList(List<string> bookList)
     {
         if (bookList.Count > 0)
