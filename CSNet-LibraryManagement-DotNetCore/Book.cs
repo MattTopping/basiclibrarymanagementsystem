@@ -1,9 +1,8 @@
 ﻿namespace CSNet_LibraryManagement_DotNetCore;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using static System.Reflection.Metadata.BlobBuilder;
 
-internal class Book
+public class Book
 {
     private Utilities tools = new Utilities();
 
@@ -75,31 +74,17 @@ internal class Book
                 command.Parameters["@id"].Value = this.bookId;
                 command.Parameters["@borrowed"].Value = this.borrowed;
 
-                // Execute SQL command
-                try
+                sqlConnection.Open();
+                int rowsAffected = command.ExecuteNonQuery();
+                if (rowsAffected <= 0)
                 {
-                    sqlConnection.Open();
-                    Int32 rowsAffected = command.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                    {
-                        Console.WriteLine(title + " was created!");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Creation failed, please try again");
-                    }
-                    sqlConnection.Close();
-
+                    throw new Exception("Unable to create/update your book.");
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                sqlConnection.Close();
             };
         };
     }
 
-    //TODO: Finish
     private void pull(Guid guid) 
     {
         string sqlQuery = "Select Title, Author, [Publication Year], Borrowed " +
@@ -119,15 +104,41 @@ internal class Book
                 {
                     while (sqlReader.Read())
                     {
-                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Title"))) title = (string)sqlReader["Title"];
-                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Author"))) author = (string)sqlReader["Author"];
-                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Publication Year"))) publicationYear = (int)sqlReader["Publication Year"];
-                        if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Borrowed"))) borrowed = (bool)sqlReader["Borrowed"];
+                        title = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Title")) ? (string)sqlReader["Title"] : null;
+                        author = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Author")) ? (string)sqlReader["Author"] : null;
+                        publicationYear = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Publication Year")) ? (int)sqlReader["Publication Year"] : null;
+                        borrowed = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Borrowed")) ? (bool)sqlReader["Borrowed"] : false; //Db Default
                     }
                     sqlReader.Close();
                 }
                 sqlConnection.Close();
             }
+        }
+    }
+
+    public void borrowBook()
+    {
+        if (borrowed == false)
+        {
+            borrowed = true;
+            push(); 
+        }
+        else 
+        {
+            throw new Exception("This book is already borrowed. You cannot borrow this book.");
+        }
+    }
+
+        public void returnBook()
+    {
+        if (borrowed == true)
+        {
+            borrowed = false;
+            push(); 
+        }
+        else 
+        {
+            throw new Exception("This book is already available in the library. You cannot return this book.");
         }
     }
 

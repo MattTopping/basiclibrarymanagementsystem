@@ -1,6 +1,6 @@
 ﻿namespace CSNet_LibraryManagement_DotNetCore;
 
-internal class CmdPrompts
+public class CmdPrompts
 {
     //User loggedInUser; // Not yet implemented
     LibraryViewer librarian;
@@ -42,6 +42,7 @@ internal class CmdPrompts
                 break;
             case "5":
                 promptBookAddition();
+                promptLibraryTasks();
                 break;
             case "E":
                 Console.WriteLine("Thank you, see you again soon!");
@@ -59,7 +60,7 @@ internal class CmdPrompts
     private void promptBookList()
     {
         List<string> bookList = librarian.fetchAllBooks();
-        bookListFormatter(bookList);
+        printBookList(bookList);
     }
 
     private void promptBookSearch()
@@ -77,7 +78,7 @@ internal class CmdPrompts
                 if (inputTitle != null)
                 {
                     List<string> bookList = librarian.fetchBooksByTitle(inputTitle);
-                    bookListFormatter(bookList);
+                    printBookList(bookList);
                 }
                 else 
                 {
@@ -90,7 +91,7 @@ internal class CmdPrompts
                 if (inputAuthor != null)
                 {
                     List<string> bookList = librarian.fetchBooksByAuthor(inputAuthor);
-                    bookListFormatter(bookList);
+                    printBookList(bookList);
                 }
                 else
                 {
@@ -107,7 +108,7 @@ internal class CmdPrompts
                     {
                         inputYearAsInt = int.Parse(inputYear);
                         List<string> bookList = librarian.fetchBooksByPublicationYear(inputYearAsInt);
-                        bookListFormatter(bookList);
+                        printBookList(bookList);
                     }
                     catch
                     {
@@ -135,18 +136,16 @@ internal class CmdPrompts
             Guid inputGuidAsGuid;
             try
             {
-                //TODO: Single use (move to another class?)
                 inputGuidAsGuid = Guid.Parse(inputGuid);
                 Book book = new Book(inputGuidAsGuid);
-                if (book.Borrowed == false)
+                try
                 {
-                    book.Borrowed = true;
-                    book.push(); //TODO: Try/Catch? 
+                    book.borrowBook();
                     Console.WriteLine("Book borrowed!");
                 }
-                else 
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Book is already borrowed. It is not available to borrow at this time.");
+                    Console.WriteLine(ex.Message);
                 }
             }
             catch
@@ -173,15 +172,14 @@ internal class CmdPrompts
 
                 //TODO: Single use (move to another class?)
                 Book book = new Book(inputGuidAsGuid);
-                if (book.Borrowed == true)
+                try
                 {
-                    book.Borrowed = false;
-                    book.push(); //TODO: Try/Catch? 
+                    book.returnBook();
                     Console.WriteLine("Book returned!");
                 }
-                else
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Book is already returned. It is not available to return at this time.");
+                    Console.WriteLine(ex.Message);
                 }
             }
             catch
@@ -249,11 +247,18 @@ internal class CmdPrompts
         }
 
         Book newBook = new Book(title, author, publicationYear);
-        newBook.push();
-        promptLibraryTasks();
+        try
+        {
+            newBook.push();
+            Console.WriteLine("Book created!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
-    private void bookListFormatter(List<string> bookList)
+    private void printBookList(List<string> bookList)
     {
         if (bookList.Count > 0)
         {
@@ -266,35 +271,5 @@ internal class CmdPrompts
         {
             Console.WriteLine("There are no books for your query.");
         }
-    }
-
-    /// <summary>
-    ///     Function is used to initial the user action to either login or create or use during the session.
-    ///     User logic is currently not implemented.
-    /// </summary>
-    public void setUser()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    ///     Function used to check if a user exists and logs in with the correct username and password.
-    ///     If complete, the user context will be set for the session
-    ///     Otherwise, the user will be prompted again.
-    /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
-    private void promptUserLogin()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    ///     Function used to createa new a user record for a new user of the application.
-    ///     Once a user has entered their details, they are set as the active user for the session
-    /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
-    private void promptUserCreate() 
-    { 
-        throw new NotImplementedException();
     }
 }

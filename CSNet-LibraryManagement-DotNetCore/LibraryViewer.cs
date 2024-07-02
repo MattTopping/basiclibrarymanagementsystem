@@ -2,7 +2,7 @@ namespace CSNet_LibraryManagement_DotNetCore;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
-internal class LibraryViewer
+public class LibraryViewer
 {
     Utilities tools;
 
@@ -132,21 +132,14 @@ internal class LibraryViewer
             int publicationYear;
             string status;
 
-            //Check SQL values for null
-            if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Book ID"))) bookid = (Guid)sqlReader["Book ID"];
-            else bookid = Guid.Empty;
+            //Check SQL values is not null
+            bookid = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Book ID")) ? (Guid)sqlReader["Book ID"] : Guid.Empty;
+            title = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Title")) ? (string)sqlReader["Title"] : string.Empty;
+            author = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Author")) ? (string)sqlReader["Author"] : string.Empty;
+            publicationYear = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Publication Year")) ? (int)sqlReader["Publication Year"] : 0; //needs refactoring. 0 is not an accurate representation of null.
 
-            if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Title"))) title = (string)sqlReader["Title"];
-            else title = string.Empty;
-
-            if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Author"))) author = (string)sqlReader["Author"];
-            else author = string.Empty;
-
-            if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Publication Year"))) publicationYear = (int)sqlReader["Publication Year"];
-            else publicationYear = 0;
-
-            if (!sqlReader.IsDBNull(sqlReader.GetOrdinal("Borrowed")) && (bool)sqlReader["Borrowed"] == true) status = "X";
-            else status = "O";
+            //Check SQL value is not null and set to related character for console (X = Borrowed, 0 = Available)
+            status = !sqlReader.IsDBNull(sqlReader.GetOrdinal("Borrowed")) && (bool)sqlReader["Borrowed"] == true ? "X" : "O";
 
             // List row in console
             books.Add(String.Format("{0} ({4}): {1} by {2} ({3})", bookid, title, author, publicationYear, status));
